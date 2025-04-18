@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Interactive 3D Demo – Fancy Geometries</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; }
+        #gui-container { position: absolute; top: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div id="gui-container"></div>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js",
+        "three/": "https://cdn.jsdelivr.net/npm/three@0.150.1/"
+      }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+        import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.17/+esm';
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x222222);
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+        camera.position.set(0, 2, 5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // Lights
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+        scene.add(ambientLight);
+
+        // Geometries & material
+        const geometries = {
+            Box: new THREE.BoxGeometry(1,1,1),
+            Sphere: new THREE.SphereGeometry(0.7, 32, 32),
+            TorusKnot: new THREE.TorusKnotGeometry(0.4, 0.15, 100, 16),
+        };
+        const material = new THREE.MeshStandardMaterial({ color: 0xff0051, metalness: 0.5, roughness: 0.3 });
+        const mesh = new THREE.Mesh(geometries.Box, material);
+        scene.add(mesh);
+
+        // GUI
+        const gui = new GUI({ container: document.getElementById('gui-container') });
+        const params = {
+            geometry: 'Box',
+            color: material.color.getHex(),
+            metalness: material.metalness,
+            roughness: material.roughness,
+            rotationSpeed: 1.0,
+        };
+        gui.add(params, 'geometry', Object.keys(geometries)).onChange(v => mesh.geometry = geometries[v]);
+        gui.addColor(params, 'color').onChange(v => material.color.set(v));
+        gui.add(params, 'metalness', 0, 1, 0.01).onChange(v => material.metalness = v);
+        gui.add(params, 'roughness', 0, 1, 0.01).onChange(v => material.roughness = v);
+        gui.add(params, 'rotationSpeed', 0, 5, 0.1);
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            mesh.rotation.x += 0.01 * params.rotationSpeed;
+            mesh.rotation.y += 0.01 * params.rotationSpeed;
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Resize handling
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth/window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
