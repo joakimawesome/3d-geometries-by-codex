@@ -26,3 +26,14 @@ Open your browser at http://localhost:8002 to view the light show.
 Simply open `index.html` in your browser—no server required.
 
 Enjoy the show!
+
+## GUI Controls
+
+The top-right controls panel (powered by lil-gui) allows you to:
+
+- **Bloom Threshold**: Set the minimum brightness level that triggers the bloom effect.  
+- **Bloom Strength**: Adjust the intensity of the glow around bright areas.  
+- **Bloom Radius**: Control the radius or spread of the bloom blur.  
+- **Number of Lights**: Change how many colored point lights orbit the mesh (0–20).  
+- **Rotation Speed**: Speed up or slow down the mesh's rotation.  
+- **Metalness** and **Roughness**: Tweak the reflective material properties of the mesh.  

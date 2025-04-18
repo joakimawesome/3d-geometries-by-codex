@@ -8,9 +8,11 @@
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; }
         canvas { display: block; }
+        #gui-container { position: absolute; top: 10px; right: 10px; z-index: 2; }
     </style>
 </head>
 <body>
+    <div id="gui-container"></div>
     <script type="importmap">
     {
       "imports": {
@@ -25,6 +27,7 @@
         import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
         import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+        import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.17/+esm';
 
         // Scene, camera, renderer
         const scene = new THREE.Scene();
@@ -46,6 +49,36 @@
         bloomPass.strength = 1.2;
         bloomPass.radius = 0.4;
         composer.addPass(bloomPass);
+        // Utility function to update point lights
+        function updateLights(count) {
+            lights.forEach(light => scene.remove(light));
+            lights = [];
+            for (let i = 0; i < count; i++) {
+                const color = lightColors[i % lightColors.length];
+                const light = new THREE.PointLight(color, 2, 10);
+                scene.add(light);
+                lights.push(light);
+            }
+        }
+
+        // GUI Controls
+        const gui = new GUI({ container: document.getElementById('gui-container') });
+        const params = {
+            bloomThreshold: bloomPass.threshold,
+            bloomStrength: bloomPass.strength,
+            bloomRadius: bloomPass.radius,
+            lightCount: 4,
+            rotationSpeed: 0.5,
+            metalness: material.metalness,
+            roughness: material.roughness,
+        };
+        gui.add(params, 'bloomThreshold', 0, 1, 0.01).onChange(v => bloomPass.threshold = v);
+        gui.add(params, 'bloomStrength', 0, 3, 0.1).onChange(v => bloomPass.strength = v);
+        gui.add(params, 'bloomRadius', 0, 1, 0.01).onChange(v => bloomPass.radius = v);
+        gui.add(params, 'rotationSpeed', 0, 5, 0.1);
+        gui.add(params, 'metalness', 0, 1, 0.01).onChange(v => material.metalness = v);
+        gui.add(params, 'roughness', 0, 1, 0.01).onChange(v => material.roughness = v);
+        gui.add(params, 'lightCount', 0, 20, 1).onChange(updateLights);
 
         // Controls
         const controls = new OrbitControls(camera, renderer.domElement);
@@ -67,19 +100,16 @@
 
         // Dynamic colored point lights
         const lightColors = [0xff0040, 0x80ff80, 0x4080ff, 0xffaa00];
-        const lights = lightColors.map(color => {
-            const light = new THREE.PointLight(color, 2, 10);
-            scene.add(light);
-            return light;
-        });
+        let lights = [];
+        updateLights(params.lightCount);
 
         // Animation
         let time = 0;
         function animate() {
             requestAnimationFrame(animate);
             time += 0.01;
-            mesh.rotation.x = time * 0.3;
-            mesh.rotation.y = time * 0.5;
+            mesh.rotation.x += 0.01 * params.rotationSpeed;
+            mesh.rotation.y += 0.01 * params.rotationSpeed;
             lights.forEach((light, i) => {
                 const angle = time * (0.5 + i * 0.3);
                 light.position.set(
