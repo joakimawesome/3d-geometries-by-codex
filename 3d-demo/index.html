@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>3D Demo – Fancy Geometries</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <!-- import map to resolve Three.js bare module specifier -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js",
+        "three/": "https://cdn.jsdelivr.net/npm/three@0.150.1/"
+      }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+        
+        // Scene, camera, renderer setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 1.5, 5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Orbit controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        // Geometries
+        const box = new THREE.Mesh(
+            new THREE.BoxGeometry(1,1,1),
+            new THREE.MeshStandardMaterial({ color: 0xff0051 })
+        );
+        box.position.set(-2, 0, 0);
+        scene.add(box);
+
+        const sphere = new THREE.Mesh(
+            new THREE.SphereGeometry(0.7, 32, 32),
+            new THREE.MeshStandardMaterial({ color: 0x00ff88 })
+        );
+        sphere.position.set(2, 0, 0);
+        scene.add(sphere);
+
+        const torusKnot = new THREE.Mesh(
+            new THREE.TorusKnotGeometry(0.5, 0.2, 100, 16),
+            new THREE.MeshStandardMaterial({ color: 0x0051ff })
+        );
+        torusKnot.position.set(0, 1.5, 0);
+        scene.add(torusKnot);
+
+        // Floor grid
+        const gridHelper = new THREE.GridHelper(10, 20);
+        scene.add(gridHelper);
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = performance.now() * 0.001;
+            box.rotation.x = time;
+            box.rotation.y = time * 1.2;
+            sphere.rotation.x = time * 1.5;
+            torusKnot.rotation.z = time * 0.8;
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
