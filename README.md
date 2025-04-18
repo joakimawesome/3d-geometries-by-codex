@@ -20,15 +20,13 @@ A simple demo showcasing rotating 3D geometries rendered in the browser using Th
 ### Running the Demo
 
 ```bash
-# Clone the repository
-git clone https://github.com/joakimawesome/3d-geometries-by-codex.git
-cd 3d-geometries-by-codex/3d-demo
-
-# Start a simple HTTP server
+cd 3d-demo
+# Option A: Start a simple HTTP server
 python3 -m http.server 8000 --bind 0.0.0.0
 ```
 
-Then open your browser at http://localhost:8000 to view the demo.
+- Option A: In your browser, navigate to http://localhost:8000 to view the demo.
+- Option B: Alternatively, open the file `3d-demo/index.html` directly in your browser (works offline).
 
 ## Repository Structure
 
