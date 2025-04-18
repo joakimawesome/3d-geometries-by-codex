@@ -28,9 +28,3 @@ python3 -m http.server 8000 --bind 0.0.0.0
 - Option A: In your browser, navigate to http://localhost:8000 to view the demo.
 - Option B: Alternatively, open the file `3d-demo/index.html` directly in your browser (works offline).
 
-## Repository Structure
-
-- README.md           Project overview and instructions
-- 3d-demo/            Contains the standalone HTML/JS demo
-  - index.html        Demo page
-  - README.md         Demo-specific instructions
