@@ -49,7 +49,29 @@
         bloomPass.strength = 1.2;
         bloomPass.radius = 0.4;
         composer.addPass(bloomPass);
-        // Utility function to update point lights
+
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // Geometry: reflective icosahedron
+        const geometry = new THREE.IcosahedronGeometry(1, 4);
+        const material = new THREE.MeshStandardMaterial({
+            color: 0x222222,
+            metalness: 0.7,
+            roughness: 0.2,
+            emissive: 0x000000
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        // Ambient light for slight base illumination
+        scene.add(new THREE.AmbientLight(0x101010));
+
+        // Dynamic colored point lights and GUI controls
+        const lightColors = [0xff0040, 0x80ff80, 0x4080ff, 0xffaa00];
+        let lights = [];
+
         function updateLights(count) {
             lights.forEach(light => scene.remove(light));
             lights = [];
@@ -80,27 +102,7 @@
         gui.add(params, 'roughness', 0, 1, 0.01).onChange(v => material.roughness = v);
         gui.add(params, 'lightCount', 0, 20, 1).onChange(updateLights);
 
-        // Controls
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-
-        // Geometry: reflective icosahedron
-        const geometry = new THREE.IcosahedronGeometry(1, 4);
-        const material = new THREE.MeshStandardMaterial({
-            color: 0x222222,
-            metalness: 0.7,
-            roughness: 0.2,
-            emissive: 0x000000
-        });
-        const mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
-
-        // Ambient light for slight base illumination
-        scene.add(new THREE.AmbientLight(0x101010));
-
-        // Dynamic colored point lights
-        const lightColors = [0xff0040, 0x80ff80, 0x4080ff, 0xffaa00];
-        let lights = [];
+        // Initial lights
         updateLights(params.lightCount);
 
         // Animation
