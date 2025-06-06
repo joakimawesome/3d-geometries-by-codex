@@ -54,45 +54,16 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        // Starfield background
-        const starGeometry = new THREE.BufferGeometry();
-        const starCount = 1000;
-        const starVertices = [];
-        for (let i = 0; i < starCount; i++) {
-            const x = (Math.random() - 0.5) * 50;
-            const y = (Math.random() - 0.5) * 50;
-            const z = (Math.random() - 0.5) * 50;
-            starVertices.push(x, y, z);
-        }
-        starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
-        const starMaterial = new THREE.PointsMaterial({ color: 0x888888, size: 0.5 });
-        const stars = new THREE.Points(starGeometry, starMaterial);
-        scene.add(stars);
-
-        // Dynamic mesh with selectable geometry and pulsating emissive
+        // Geometry: reflective icosahedron
+        const geometry = new THREE.IcosahedronGeometry(1, 4);
         const material = new THREE.MeshStandardMaterial({
             color: 0x222222,
             metalness: 0.7,
             roughness: 0.2,
             emissive: 0x000000
         });
-        const mesh = new THREE.Mesh(null, material);
+        const mesh = new THREE.Mesh(geometry, material);
         scene.add(mesh);
-
-        const geometryTypes = {
-            Icosahedron: () => new THREE.IcosahedronGeometry(1, 4),
-            Torus: () => new THREE.TorusGeometry(1, 0.4, 16, 100),
-            TorusKnot: () => new THREE.TorusKnotGeometry(0.8, 0.3, 100, 16),
-            Octahedron: () => new THREE.OctahedronGeometry(1, 2),
-            Box: () => new THREE.BoxGeometry(1.5, 1.5, 1.5),
-            Dodecahedron: () => new THREE.DodecahedronGeometry(1, 0)
-        };
-
-        function updateGeometry(type) {
-            if (mesh.geometry) mesh.geometry.dispose();
-            mesh.geometry = geometryTypes[type]();
-        }
-        updateGeometry('Icosahedron');
 
         // Ambient light for slight base illumination
         scene.add(new THREE.AmbientLight(0x101010));
@@ -122,9 +93,6 @@
             rotationSpeed: 0.5,
             metalness: material.metalness,
             roughness: material.roughness,
-            geometry: 'Icosahedron',
-            pulseSpeed: 1.0,
-            emissiveIntensity: 1.0
         };
         gui.add(params, 'bloomThreshold', 0, 1, 0.01).onChange(v => bloomPass.threshold = v);
         gui.add(params, 'bloomStrength', 0, 3, 0.1).onChange(v => bloomPass.strength = v);
@@ -133,9 +101,6 @@
         gui.add(params, 'metalness', 0, 1, 0.01).onChange(v => material.metalness = v);
         gui.add(params, 'roughness', 0, 1, 0.01).onChange(v => material.roughness = v);
         gui.add(params, 'lightCount', 0, 20, 1).onChange(updateLights);
-        gui.add(params, 'geometry', Object.keys(geometryTypes)).name('Geometry').onChange(updateGeometry);
-        gui.add(params, 'pulseSpeed', 0, 5, 0.1).name('Pulse Speed');
-        gui.add(params, 'emissiveIntensity', 0, 3, 0.1).name('Emissive Intensity');
 
         // Initial lights
         updateLights(params.lightCount);
@@ -147,8 +112,6 @@
             time += 0.01;
             mesh.rotation.x += 0.01 * params.rotationSpeed;
             mesh.rotation.y += 0.01 * params.rotationSpeed;
-            // Pulsating emissive
-            material.emissiveIntensity = params.emissiveIntensity * (0.5 + 0.5 * Math.sin(time * params.pulseSpeed));
             lights.forEach((light, i) => {
                 const angle = time * (0.5 + i * 0.3);
                 light.position.set(
@@ -157,8 +120,6 @@
                     Math.sin(angle) * 4
                 );
             });
-            // Rotate starfield
-            stars.rotation.y += 0.001;
             controls.update();
             composer.render();
         }
